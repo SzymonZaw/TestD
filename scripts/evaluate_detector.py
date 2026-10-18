@@ -11,11 +11,15 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from app import COMPILED_PATTERNS  # noqa: E402
+from app import COMPILED_PATTERNS, is_educational_mention  # noqa: E402
 
 
 def predicts_attack(text: str) -> bool:
-    return any(item["regex"].search(text) for item in COMPILED_PATTERNS)
+    return any(
+        not is_educational_mention(text, match)
+        for item in COMPILED_PATTERNS
+        for match in item["regex"].finditer(text)
+    )
 
 
 def calculate_metrics(samples: list[dict]) -> dict[str, float | int]:
