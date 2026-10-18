@@ -7,7 +7,8 @@ Lokalny prototyp edukacyjny do badania wybranych oznak **indirect prompt injecti
 - `app.py` — API FastAPI z heurystycznym detektorem.
 - `index.html` — interfejs demonstracyjny.
 - `tests/test_detector.py` — testy API, detektora, danych i niezależnej polityki narzędzi.
-- `data/evaluation_samples.jsonl` — ręcznie oznaczone próbki pilotażowe.
+- `data/evaluation_samples.jsonl` — ręcznie oznaczone próbki pilotażowe/rozwojowe.
+- `data/heldout_evaluation_samples.jsonl` — oddzielny, zbalansowany zestaw 32 ręcznie przygotowanych próbek do testu odłożonego.
 - `scripts/evaluate_detector.py` — metryki detektora (precision, recall, F1, FPR i macierz pomyłek).
 - `scripts/agent_experiment.py` — porównanie czterech wariantów agenta z lokalnym Ollama.
 - `scripts/browser_agent_experiment.py` — test z Chromium: próbki są renderowane jako lokalne strony HTML, tekst jest odczytywany z DOM, a agent może wykonać maksymalnie dwie tury modelu.
@@ -34,6 +35,7 @@ Otwieraj interfejs przez serwer FastAPI, a nie jako plik `index.html`, aby żąd
 
 ```powershell
 python scripts/evaluate_detector.py
+python scripts/evaluate_detector.py --dataset data/heldout_evaluation_samples.jsonl
 python -m pytest -q
 ```
 
@@ -47,6 +49,7 @@ Wymagania: działające Ollama i model, np. `qwen2.5:3b`.
 ollama list
 python scripts/agent_experiment.py --model qwen2.5:3b
 python scripts/agent_experiment.py --model qwen2.5:3b --all
+python scripts/agent_experiment.py --model qwen2.5:3b --all --dataset data/heldout_evaluation_samples.jsonl
 ```
 
 Skrypt zapisuje `data/agent_experiment_results.csv`. Dostępne warianty:
@@ -78,6 +81,7 @@ Następnie uruchom:
 ```powershell
 python scripts/browser_agent_experiment.py --model qwen2.5:3b
 python scripts/browser_agent_experiment.py --model qwen2.5:3b --all
+python scripts/browser_agent_experiment.py --model qwen2.5:3b --all --dataset data/heldout_evaluation_samples.jsonl
 ```
 
 Wyniki trafiają do `data/browser_agent_experiment_results.csv`. Skrypt **nie otwiera publicznych stron**: HTML jest generowany lokalnie, a tekst próbek jest escapowany, żeby nie wykonywać kodu dostarczonego w danych. To test ścieżki DOM i pętli decyzyjnej, a nie pełny benchmark prawdziwego agenta przeglądającego Internet.
@@ -94,7 +98,7 @@ Warto mierzyć co najmniej:
 - błędy parsowania i opóźnienie;
 - różnice pomiędzy modelami, parafrazami i typami treści.
 
-Pojedynczy przebieg na małym modelu nie wystarczy do potwierdzenia hipotezy. Należy wykonać replikacje, zachować identyczne ustawienia modeli i podzielić dane na zestawy rozwojowy oraz testowy.
+Pojedynczy przebieg na małym modelu nie wystarczy do potwierdzenia hipotezy. `evaluation_samples.jsonl` i `heldout_evaluation_samples.jsonl` są ręcznie przygotowanymi zestawami, a nie uznanym benchmarkiem; odłożony zbiór też wymaga niezależnego przeglądu etykiet. Wykonaj replikacje, zachowaj identyczne ustawienia modeli i nie dopasowuj reguł do wyników zbioru odłożonego.
 
 ## Uznane benchmarki i kolejne kroki
 
