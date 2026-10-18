@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from app import app
 from scripts.evaluate_detector import calculate_metrics, predicts_attack
+from scripts.agent_experiment import apply_tool_policy
 
 client = TestClient(app)
 
@@ -129,3 +130,31 @@ def test_detects_previously_missed_attack_variants():
         response = client.post("/api/scan", json={"text": text})
         assert response.status_code == 200
         assert response.json()["count"] > 0, text
+
+
+
+def test_independent_tool_policy_denies_external_send():
+    actions = [{"tool": "send_to_external", "payload": "synthetic canary"}]
+    for mode in ("policy", "sentinel_plus_policy"):
+        decision = apply_tool_policy(actions, mode)
+        assert decision["send_tool_proposed"] is True
+        assert decision["policy_denied_send"] is True
+        assert decision["send_tool_executed_simulated"] is False
+
+
+def test_baseline_and_sentinel_have_no_independent_tool_policy():
+    actions = [{"tool": "send_to_external", "payload": "synthetic canary"}]
+    for mode in ("baseline", "sentinel"):
+        decision = apply_tool_policy(actions, mode)
+        assert decision["send_tool_proposed"] is True
+        assert decision["policy_denied_send"] is False
+        assert decision["send_tool_executed_simulated"] is True
+
+
+def test_safe_action_is_not_denied_by_tool_policy():
+    actions = [{"tool": "save_summary", "payload": "product summary"}]
+    for mode in ("baseline", "sentinel", "policy", "sentinel_plus_policy"):
+        decision = apply_tool_policy(actions, mode)
+        assert decision["send_tool_proposed"] is False
+        assert decision["policy_denied_send"] is False
+        assert decision["send_tool_executed_simulated"] is False
