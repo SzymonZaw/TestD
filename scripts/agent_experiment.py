@@ -151,7 +151,8 @@ def main() -> int:
     with dataset.open(encoding="utf-8") as file:
         samples = [json.loads(line) for line in file if line.strip()]
     chosen = interleaved_samples(samples, 0 if args.all else max(1, args.limit))
-    output = ROOT / "data" / "agent_experiment_results.csv"
+    output_name = "agent_experiment_results.csv" if dataset.name == "evaluation_samples.jsonl" else f"agent_experiment_results_{dataset.stem}.csv"
+    output = ROOT / "data" / output_name
     rows = []
 
     print(f"Model: {args.model} | próbki: {len(chosen)} | warianty: {len(MODES)}")
