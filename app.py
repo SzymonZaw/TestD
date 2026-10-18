@@ -44,12 +44,21 @@ EDUCATIONAL_CONTEXT = re.compile(
     r".{0,100}(?:phrase|fraz(?:a|ę|y)|przykład|example)",
     re.IGNORECASE | re.DOTALL,
 )
+NON_ACTIONABLE_CONTEXT = re.compile(
+    r"only when the user explicitly requests it"
+    r"|after the customer approves"
+    r"|(?:the phrase.{0,80})?(?:appears|is listed) in the glossary",
+    re.IGNORECASE | re.DOTALL,
+)
 
 
 def is_educational_mention(text: str, match: re.Match[str]) -> bool:
-    """Avoid flagging a matched phrase when it is discussed as an example."""
+    """Avoid alerting on clearly educational or explicitly authorized mentions."""
     context = text[max(0, match.start() - 180):min(len(text), match.end() + 100)]
-    return EDUCATIONAL_CONTEXT.search(context) is not None
+    return (
+        EDUCATIONAL_CONTEXT.search(context) is not None
+        or NON_ACTIONABLE_CONTEXT.search(context) is not None
+    )
 
 app = FastAPI(
     title="Sentinel AI Web Shield API",
