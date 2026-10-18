@@ -6,7 +6,9 @@ Lokalny prototyp edukacyjny do badania wybranych oznak **indirect prompt injecti
 
 - `index.html` — interfejs demonstracyjny, który wysyła tekst do lokalnego API i wyświetla raport.
 - `app.py` — API FastAPI z endpointem `POST /api/scan` i kontrolą działania `GET /health`.
-- `tests/test_detector.py` — testy endpointów, rozpoznawania podejrzanych fraz, bezpiecznej próbki, walidacji danych i połączenia interfejsu z API.
+- `tests/test_detector.py` — testy endpointów, walidacji danych oraz obliczeń metryk.
+- `data/evaluation_samples.jsonl` — mały, ręcznie oznaczony zbiór przykładów ataków i tekstów bezpiecznych.
+- `scripts/evaluate_detector.py` — skrypt obliczający podstawowe metryki detektora.
 - `.github/workflows/tests.yml` — automatyczne uruchamianie testów przy pushu i pull requeście.
 
 ## Uruchomienie w Windows / PyCharm
@@ -32,6 +34,25 @@ Lokalny prototyp edukacyjny do badania wybranych oznak **indirect prompt injecti
 
 **Ważne:** otwieraj interfejs przez adres serwera FastAPI, a nie jako plik `index.html`. Dzięki temu żądanie `fetch('/api/scan')` trafi do API.
 
+## Ewaluacja detektora
+
+Z katalogu repozytorium uruchom:
+
+```bash
+python scripts/evaluate_detector.py
+```
+
+Skrypt oblicza:
+- **Precision** — jaka część alertów dotyczyła oznaczonych ataków.
+- **Recall** — jaka część oznaczonych ataków została wykryta.
+- **F1** — średnia harmoniczna precision i recall.
+- **False positive rate** — jaka część bezpiecznych przykładów wywołała alert.
+- **TP, FP, TN, FN** — liczby poprawnych i błędnych klasyfikacji.
+
+Zbiór zawiera przykłady łatwe, parafrazy i bezpieczne teksty omawiające podejrzane frazy. Oczekiwane wyniki są jawnie zapisane w polu `is_attack`. Przejrzyj ręcznie błędne klasyfikacje zamiast automatycznie dopasowywać reguły do pojedynczych przykładów.
+
+**Ograniczenie:** to niewielki zbiór demonstracyjny, nie reprezentatywny benchmark. Metryki z niego nie przewidują skuteczności w realnym ruchu.
+
 ## Przykład wywołania API
 
 ```bash
@@ -50,11 +71,7 @@ Uruchom z katalogu repozytorium:
 python -m pytest -q
 ```
 
-Testy sprawdzają:
-- `/health` oraz odpowiedź `POST /api/scan`;
-- wykrywanie podejrzanych fraz i brak trafień w przykładowej zwykłej treści;
-- pusty tekst, brak pola `text`, nieprawidłowy typ i limit 200 000 znaków;
-- czy strona główna serwuje interfejs HTML korzystający z API i zawiera obsługę błędu połączenia.
+Testy sprawdzają endpointy, wykrywanie wybranych fraz, bezpieczną próbkę, walidację danych, integrację strony z API oraz obliczenia metryk i strukturę zbioru ewaluacyjnego.
 
 GitHub Actions uruchamia testy automatycznie po wysłaniu zmian na GitHub oraz dla pull requestów.
 
@@ -66,9 +83,9 @@ GitHub Actions uruchamia testy automatycznie po wysłaniu zmian na GitHub oraz d
 - Nie wklejaj prawdziwych haseł, kluczy API ani danych poufnych do testowanych próbek.
 - Prototyp nie powinien samodzielnie podejmować decyzji o blokowaniu użytkowników ani wykonywać działań na podstawie wyniku. Przed użyciem produkcyjnym potrzebne są m.in. testy bezpieczeństwa, monitoring, ograniczenia żądań, polityka prywatności i walidacja na reprezentatywnym zbiorze danych.
 
-## Plan rozwoju
+## Kolejne kroki
 
-1. Zbudować zestaw testowy z bezpiecznymi przykładami i wariantami ataków.
-2. Mierzyć precision/recall, F1 i odsetek fałszywych alarmów na oznaczonym zbiorze danych.
-3. Rozdzielić analizę tekstu, kontekst źródła i decyzję o zaufaniu.
-4. Dodać audytowalne reguły oraz mechanizm raportowania błędnych klasyfikacji.
+1. Powiększyć i niezależnie zweryfikować zbiór ewaluacyjny.
+2. Analizować błędne klasyfikacje i mierzyć zmiany metryk po każdej modyfikacji reguł.
+3. Dodać podział danych na zestaw rozwojowy i testowy.
+4. Przed zastosowaniem praktycznym przeprowadzić przegląd bezpieczeństwa i prywatności.
