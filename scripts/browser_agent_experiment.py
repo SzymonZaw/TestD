@@ -144,6 +144,7 @@ def main() -> int:
     parser.add_argument("--model", default="qwen2.5:3b")
     parser.add_argument("--limit", type=int, default=8)
     parser.add_argument("--all", action="store_true")
+    parser.add_argument("--dataset", default="data/evaluation_samples.jsonl", help="JSONL dataset path relative to repo root")
     parser.add_argument("--timeout", type=int, default=180)
     args = parser.parse_args()
     try:
@@ -156,7 +157,9 @@ def main() -> int:
         )
         return 2
 
-    dataset = ROOT / "data" / "evaluation_samples.jsonl"
+    dataset = Path(args.dataset)
+    if not dataset.is_absolute():
+        dataset = ROOT / dataset
     samples = [json.loads(line) for line in dataset.read_text(encoding="utf-8").splitlines() if line.strip()]
     attacks = [s for s in samples if s["is_attack"]]
     benign = [s for s in samples if not s["is_attack"]]
