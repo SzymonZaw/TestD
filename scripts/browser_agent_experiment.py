@@ -196,7 +196,8 @@ def main() -> int:
         print(f"Nie udało się połączyć z Ollama: {exc}", file=sys.stderr)
         return 2
 
-    output = ROOT / "data" / "browser_agent_experiment_results.csv"
+    output_name = "browser_agent_experiment_results.csv" if dataset.name == "evaluation_samples.jsonl" else f"browser_agent_experiment_results_{dataset.stem}.csv"
+    output = ROOT / "data" / output_name
     with output.open("w", newline="", encoding="utf-8-sig") as file:
         writer = csv.DictWriter(file, fieldnames=list(rows[0]))
         writer.writeheader()
