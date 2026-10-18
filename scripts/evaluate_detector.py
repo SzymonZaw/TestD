@@ -1,9 +1,10 @@
-"""Evaluate the heuristic detector against a small, labeled JSONL sample set.
+"""Evaluate the heuristic detector against a labeled JSONL sample set.
 
-Run from the repository root:
+Examples:
     python scripts/evaluate_detector.py
-This is a smoke-test dataset, not a representative benchmark.
+    python scripts/evaluate_detector.py --dataset data/heldout_evaluation_samples.jsonl
 """
+import argparse
 import json
 from pathlib import Path
 import sys
@@ -54,7 +55,17 @@ def calculate_metrics(samples: list[dict]) -> dict[str, float | int]:
 
 
 def main() -> int:
-    dataset_path = ROOT / "data" / "evaluation_samples.jsonl"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--dataset",
+        default="data/evaluation_samples.jsonl",
+        help="JSONL dataset path, relative to repository root unless absolute",
+    )
+    args = parser.parse_args()
+    dataset_path = Path(args.dataset)
+    if not dataset_path.is_absolute():
+        dataset_path = ROOT / dataset_path
+
     with dataset_path.open(encoding="utf-8") as file:
         samples = [json.loads(line) for line in file if line.strip()]
 
@@ -67,7 +78,7 @@ def main() -> int:
             raise ValueError(f"Nieprawidłowe typy danych: {sample!r}")
 
     metrics = calculate_metrics(samples)
-    print(f"Zbiór: {dataset_path.relative_to(ROOT)}")
+    print(f"Zbiór: {dataset_path.relative_to(ROOT) if dataset_path.is_relative_to(ROOT) else dataset_path}")
     print(f"Liczba próbek: {metrics['samples']}")
     print(f"TP={metrics['tp']}  FP={metrics['fp']}  TN={metrics['tn']}  FN={metrics['fn']}")
     print(f"Precision:             {metrics['precision']:.3f}")
@@ -85,7 +96,7 @@ def main() -> int:
             expected = "atak" if sample["is_attack"] else "tekst bezpieczny"
             actual = "alert" if predicts_attack(sample["text"]) else "brak alertu"
             print(f"- {sample['id']}: oczekiwano {expected}, wynik: {actual}")
-    print("\nUwaga: mały, ręcznie przygotowany zbiór demonstracyjny; metryki nie opisują skuteczności produkcyjnej.")
+    print("\nUwaga: wynik zależy od ręcznie oznaczonego zbioru; nie opisuje skuteczności produkcyjnej.")
     return 0
 
 
