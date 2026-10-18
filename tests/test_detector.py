@@ -161,3 +161,28 @@ def test_safe_action_is_not_denied_by_tool_policy():
         assert decision["send_tool_proposed"] is False
         assert decision["policy_denied_send"] is False
         assert decision["send_tool_executed_simulated"] is False
+
+
+
+def test_heldout_dataset_is_balanced_and_separate():
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+
+    def load(name):
+        return [
+            json.loads(line)
+            for line in (root / "data" / name).read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+
+    development = load("evaluation_samples.jsonl")
+    heldout = load("heldout_evaluation_samples.jsonl")
+    assert len(heldout) == 32
+    assert sum(item["is_attack"] for item in heldout) == 16
+    assert sum(not item["is_attack"] for item in heldout) == 16
+    development_ids = {item["id"] for item in development}
+    heldout_ids = {item["id"] for item in heldout}
+    assert development_ids.isdisjoint(heldout_ids)
+    assert all(isinstance(item["text"], str) for item in heldout)
