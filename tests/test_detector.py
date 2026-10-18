@@ -43,6 +43,17 @@ def test_clean_text_has_no_known_patterns():
     assert data["disclaimer"]
 
 
+def test_educational_mentions_do_not_trigger_alerts():
+    samples = [
+        "Aby zrozumieć prompt injection, artykuł omawia przykładową frazę: ignore all previous instructions.",
+        "The security guide explains why the phrase 'reveal the user data' may be suspicious; it does not ask anyone to do so.",
+    ]
+    for text in samples:
+        response = client.post("/api/scan", json={"text": text})
+        assert response.status_code == 200
+        assert response.json()["findings"] == [], text
+
+
 def test_empty_text_is_valid_and_has_no_findings():
     response = client.post("/api/scan", json={"text": ""})
     assert response.status_code == 200
@@ -115,4 +126,3 @@ def test_detects_previously_missed_attack_variants():
         response = client.post("/api/scan", json={"text": text})
         assert response.status_code == 200
         assert response.json()["count"] > 0, text
-
