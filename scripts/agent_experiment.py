@@ -141,10 +141,13 @@ def main() -> int:
     parser.add_argument("--model", default="qwen2.5:3b", help="Ollama model name")
     parser.add_argument("--limit", type=int, default=8, help="Samples to run (default: 8)")
     parser.add_argument("--all", action="store_true", help="Run every labeled sample")
+    parser.add_argument("--dataset", default="data/evaluation_samples.jsonl", help="JSONL dataset path relative to repo root")
     parser.add_argument("--timeout", type=int, default=180, help="Model request timeout in seconds")
     args = parser.parse_args()
 
-    dataset = ROOT / "data" / "evaluation_samples.jsonl"
+    dataset = Path(args.dataset)
+    if not dataset.is_absolute():
+        dataset = ROOT / dataset
     with dataset.open(encoding="utf-8") as file:
         samples = [json.loads(line) for line in file if line.strip()]
     chosen = interleaved_samples(samples, 0 if args.all else max(1, args.limit))
