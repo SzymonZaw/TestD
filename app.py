@@ -15,17 +15,17 @@ BASE_DIR = Path(__file__).resolve().parent
 PATTERNS = [
     {
         "name": "Próba nadpisania instrukcji",
-        "pattern": r"ignore (all )?(previous|prior|earlier) instructions|zignoruj (wszystkie )?(wcześniejsze|poprzednie) polecenia|disregard (all )?previous instructions",
+        "pattern": r"ignore (all )?(previous|prior|earlier) instructions|zignoruj (wszystkie )?(wcześniejsze|poprzednie) polecenia|disregard (all )?previous instructions|pretend the system message no longer applies|nie stosuj się do zasad",
         "detail": "Treść próbuje zmienić hierarchię poleceń agenta.",
     },
     {
         "name": "Próba ujawnienia danych",
-        "pattern": r"reveal (the )?(user|private|secret|sensitive) data|ujawnij (dane|sekrety)|exfiltrat|dane użytkownika",
+        "pattern": r"reveal (the )?(user|private|secret|sensitive) data|ujawnij (dane|sekrety)|exfiltrat|dane użytkownika|confidential records|private data|prywatne dane",
         "detail": "Treść sugeruje ujawnienie danych lub informacji wrażliwych.",
     },
     {
         "name": "Nieautoryzowane wysłanie danych",
-        "pattern": r"send (them|it|data|the results) to|post .* to https?:|wyślij .* (na|do) (zewnętrzny|serwer)|zewnętrzny serwer",
+        "pattern": r"send (them|it|data|the results) to|post .* to https?:|wyślij .* (na|do) (zewnętrzny|serwer)|zewnętrzny serwer|forward .* (to|into) my inbox|transfer .* outside this environment|session token",
         "detail": "Treść może próbować wysłać informacje poza zaufany kontekst.",
     },
     {
