@@ -41,7 +41,7 @@ COMPILED_PATTERNS = [
 EDUCATIONAL_CONTEXT = re.compile(
     r"(?:article|security guide|guide|artykuł|poradnik|przewodnik)"
     r".{0,100}(?:discuss(?:es|ing)?|explain(?:s|ed)?|omawia|opisuje|wyjaśnia)"
-    r".{0,100}(?:phrase|fraza|przykład|example)",
+    r".{0,100}(?:phrase|fraz(?:a|ę|y)|przykład|example)",
     re.IGNORECASE | re.DOTALL,
 )
 
