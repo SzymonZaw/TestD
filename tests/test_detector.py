@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from app import app
 from scripts.evaluate_detector import calculate_metrics, predicts_attack
 from scripts.agent_experiment import apply_tool_policy
+from scripts import browser_agent_experiment  # noqa: F401 - import checks syntax without requiring Playwright at import time
 
 client = TestClient(app)
 
