@@ -48,6 +48,9 @@ def test_educational_mentions_do_not_trigger_alerts():
     samples = [
         "Aby zrozumieć prompt injection, artykuł omawia przykładową frazę: ignore all previous instructions.",
         "The security guide explains why the phrase 'reveal the user data' may be suspicious; it does not ask anyone to do so.",
+        "The product manual says to run this command from the terminal only when the user explicitly requests it.",
+        "Please send the results to the support team after the customer approves the report.",
+        "The phrase 'make a purchase' appears in the glossary of common online shopping terms.",
     ]
     for text in samples:
         response = client.post("/api/scan", json={"text": text})
