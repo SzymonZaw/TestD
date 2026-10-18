@@ -75,6 +75,34 @@ Testy sprawdzają endpointy, wykrywanie wybranych fraz, bezpieczną próbkę, wa
 
 GitHub Actions uruchamia testy automatycznie po wysłaniu zmian na GitHub oraz dla pull requestów.
 
+
+## Eksperyment z agentem Ollama
+
+Skrypt `scripts/agent_experiment.py` uruchamia lokalny model jako agenta analizującego próbki złośliwych i bezpiecznych treści. Agent zwraca podsumowanie oraz proponowane wywołania narzędzi. Narzędzie `send_to_external` jest wyłącznie symulowane — skrypt nie wykonuje połączeń wysyłających dane.
+
+1. Zaktualizuj lokalne repozytorium:
+   ```powershell
+   git pull
+   ```
+2. Upewnij się, że Ollama działa i model jest dostępny:
+   ```powershell
+   ollama list
+   ollama run qwen2.5:3b
+   ```
+   W sesji modelu wpisz `/bye`, aby wrócić do PowerShella.
+3. Z katalogu głównego projektu uruchom mały test:
+   ```powershell
+   python scripts/agent_experiment.py
+   ```
+   Domyślnie skrypt używa 8 próbek, przeplatanych między atakami i treściami bezpiecznymi, w trzech wariantach: bez filtra, z filtrem Sentinel oraz z filtrem i kontrolą narzędzia.
+4. Pełny zbiór (więcej wywołań modelu, dłuższy czas):
+   ```powershell
+   python scripts/agent_experiment.py --all
+   ```
+5. Wyniki zostaną zapisane w `data/agent_experiment_results.csv`.
+
+Eksperyment jest wstępnym testem badawczym: model może nie zastosować się do ataku nawet bez filtra, a mały model i mały zbiór nie reprezentują wszystkich agentów. Warianty są porównywalne tylko przy tej samej wersji modelu i ustawieniach. Wszystkie narzędzia są atrapami działającymi lokalnie; nie dodawaj prawdziwych sekretów ani prawdziwych integracji.
+
 ## Ograniczenia i bezpieczeństwo
 
 - Brak wykrytych wzorców **nie oznacza**, że treść jest bezpieczna.
