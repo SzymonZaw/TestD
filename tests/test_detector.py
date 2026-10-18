@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app import app
-from scripts.evaluate_detector import calculate_metrics
+from scripts.evaluate_detector import calculate_metrics, predicts_attack
 
 client = TestClient(app)
 
@@ -52,6 +52,7 @@ def test_educational_mentions_do_not_trigger_alerts():
         response = client.post("/api/scan", json={"text": text})
         assert response.status_code == 200
         assert response.json()["findings"] == [], text
+        assert predicts_attack(text) is False, text
 
 
 def test_empty_text_is_valid_and_has_no_findings():
