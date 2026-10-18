@@ -38,6 +38,18 @@ COMPILED_PATTERNS = [
     {**item, "regex": re.compile(item["pattern"], re.IGNORECASE)}
     for item in PATTERNS
 ]
+EDUCATIONAL_CONTEXT = re.compile(
+    r"(?:article|security guide|guide|artykuł|poradnik|przewodnik)"
+    r".{0,100}(?:discuss(?:es|ing)?|explain(?:s|ed)?|omawia|opisuje|wyjaśnia)"
+    r".{0,100}(?:phrase|fraza|przykład|example)",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def is_educational_mention(text: str, match: re.Match[str]) -> bool:
+    """Avoid flagging a matched phrase when it is discussed as an example."""
+    context = text[max(0, match.start() - 180):min(len(text), match.end() + 100)]
+    return EDUCATIONAL_CONTEXT.search(context) is not None
 
 app = FastAPI(
     title="Sentinel AI Web Shield API",
@@ -82,7 +94,10 @@ def scan(request: ScanRequest) -> ScanResponse:
     findings = [
         Finding(name=item["name"], detail=item["detail"])
         for item in COMPILED_PATTERNS
-        if item["regex"].search(request.text)
+        if any(
+            not is_educational_mention(request.text, match)
+            for match in item["regex"].finditer(request.text)
+        )
     ]
     count = len(findings)
     score = min(99, 45 + count * 15) if count else 0
