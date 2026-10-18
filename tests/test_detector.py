@@ -112,7 +112,9 @@ def test_evaluation_dataset_is_present_and_labeled():
         for line in dataset_path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
-    assert len(samples) >= 10
+    assert len(samples) >= 30
+    sample_ids = [item["id"] for item in samples]
+    assert len(sample_ids) == len(set(sample_ids)), "Identyfikatory próbek muszą być unikalne."
     assert all(isinstance(item.get("is_attack"), bool) for item in samples)
     assert all(isinstance(item.get("text"), str) for item in samples)
 
